@@ -254,7 +254,45 @@ def betterEvaluationFunction(currentGameState: GameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    if currentGameState.isLose():
+        return -1e30
+    pacman = currentGameState.getPacmanPosition()
+    foodPosition = currentGameState.getFood().asList()
+    capsulesPosition = currentGameState.getCapsules()
+    ghostStates = currentGameState.getGhostStates()
+    stateValue = 10000 - 10 * len(foodPosition) - 5 * len(capsulesPosition)
+
+    distances = dict()
+    def prework():
+        fringe = util.Queue()
+        fringe.push(pacman)
+        distances[pacman] = 0
+        walls = currentGameState.getWalls()
+        while not fringe.isEmpty():
+            currentx, currenty = fringe.pop()
+            current = (currentx, currenty)
+            for (dx, dy) in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
+                nextx, nexty = currentx + dx, currenty + dy
+                next = (nextx, nexty)
+                if not walls[nextx][nexty] and next not in distances.keys():
+                    distances[next] = distances[current] + 1
+                    fringe.push(next)
+    prework()
+
+    for food in foodPosition:
+        stateValue += .8 ** distances[food]
+        "*** stateValue += 1. / distances[food] ***"
+    for capsules in capsulesPosition:
+        stateValue += .85 ** distances[capsules]
+    for ghost in ghostStates:
+        ghostPosition = ghost.getPosition()
+        ghostx, ghosty = int(ghostPosition[0]), int(ghostPosition[1])
+        dis = distances[(ghostx, ghosty)]
+        if ghost.scaredTimer <= 3:
+            stateValue -= 1. / dis
+        else:
+            stateValue += 100 * 0.5 ** dis
+    return stateValue
 
 # Abbreviation
 better = betterEvaluationFunction
