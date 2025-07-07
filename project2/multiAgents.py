@@ -252,6 +252,10 @@ def betterEvaluationFunction(currentGameState: GameState):
     evaluation function (question 5).
 
     DESCRIPTION: <write something here so we know what you did>
+
+    I cannot describe my solution since it is too weird. By reading my code
+    one can easily understand the evalution method, but the agent does 
+    really inexplicable actions.
     """
     "*** YOUR CODE HERE ***"
     if currentGameState.isLose():
@@ -260,7 +264,7 @@ def betterEvaluationFunction(currentGameState: GameState):
     foodPosition = currentGameState.getFood().asList()
     capsulesPosition = currentGameState.getCapsules()
     ghostStates = currentGameState.getGhostStates()
-    stateValue = 10000 - 10 * len(foodPosition) - 5 * len(capsulesPosition)
+    stateValue = 10000 - 5 * len(foodPosition) - 5 * len(capsulesPosition)
 
     distances = dict()
     def prework():
@@ -291,7 +295,7 @@ def betterEvaluationFunction(currentGameState: GameState):
         if ghost.scaredTimer <= 3:
             stateValue -= 1. / dis
         else:
-            stateValue += 100 * 0.5 ** dis
+            stateValue += 100 * (0.7 ** dis)
     return stateValue
 
 # Abbreviation
