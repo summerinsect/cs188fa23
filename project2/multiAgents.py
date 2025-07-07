@@ -171,7 +171,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     bestScore, bestChoice = score, action
             return (bestScore, bestChoice)
         return minimaxSearch(0, gameState, 0)[1]
-        util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -183,7 +182,32 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def minimaxSearch(agentIndex, gameState, alpha, beta, depth):
+            if gameState.isWin() or gameState.isLose() or depth == self.depth:
+                return (self.evaluationFunction(gameState), 0)
+            legalMoves = gameState.getLegalActions(agentIndex)
+            nextIndex, nextDepth = agentIndex + 1, depth
+            if nextIndex == gameState.getNumAgents():
+                nextIndex, nextDepth = 0, depth + 1
+            bestScore, bestChoice = 1e50, 0
+            if agentIndex == 0:
+                bestScore = -1e50
+            for action in legalMoves:
+                successorState = gameState.generateSuccessor(agentIndex, action)
+                score, _ = minimaxSearch(nextIndex, successorState, alpha, beta, nextDepth)
+                if agentIndex == 0 and score > bestScore:
+                    bestScore, bestChoice = score, action
+                    if bestScore > beta:
+                        return (bestScore, bestChoice)
+                    alpha = max(alpha, bestScore)
+                if agentIndex != 0 and score < bestScore:
+                    bestScore, bestChoice = score, action
+                    if bestScore < alpha:
+                        return (bestScore, bestChoice)
+                    beta = min(beta, bestScore)
+            return (bestScore, bestChoice)
+        return minimaxSearch(0, gameState, -1e50, 1e50, 0)[1]
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -198,7 +222,29 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def expectimaxSearch(agentIndex, gameState, depth):
+            if gameState.isWin() or gameState.isLose() or depth == self.depth:
+                return (self.evaluationFunction(gameState), 0)
+            legalMoves = gameState.getLegalActions(agentIndex)
+            nextIndex, nextDepth = agentIndex + 1, depth
+            if nextIndex == gameState.getNumAgents():
+                nextIndex, nextDepth = 0, depth + 1
+            if agentIndex == 0:
+                bestScore, bestChoice = -1e30, 0
+                for action in legalMoves:
+                    successorState = gameState.generateSuccessor(agentIndex, action)
+                    score, _ = expectimaxSearch(nextIndex, successorState, nextDepth)
+                    if score > bestScore:
+                        bestScore, bestChoice = score, action
+                return (bestScore, bestChoice)
+            else:
+                averageScore = 0
+                for action in legalMoves:
+                    successorState = gameState.generateSuccessor(agentIndex, action)
+                    score, _ = expectimaxSearch(nextIndex, successorState, nextDepth)
+                    averageScore += score
+                return (averageScore / len(legalMoves), 0)
+        return expectimaxSearch(0, gameState, 0)[1]
 
 def betterEvaluationFunction(currentGameState: GameState):
     """
