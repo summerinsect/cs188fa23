@@ -342,10 +342,10 @@ class DiscreteDistribution(dict):
         {}
         """
         "*** YOUR CODE HERE ***"
-        totalValue = sum(self.values())
-        if totalValue > 0:
+        total =  self.total()
+        if total > 0:
             for key in self:
-                self[key] = self[key] / totalValue
+                self[key] = self[key] / total
         "*** END YOUR CODE HERE ***"
 
     def sample(self):
@@ -625,7 +625,8 @@ class ParticleFilter(InferenceModule):
         """
         self.particles = []
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        for i in range(0, self.numParticles):
+            self.particles.append(self.legalPositions[i % len(self.legalPositions)])
         "*** END YOUR CODE HERE ***"
 
     def getBeliefDistribution(self):
@@ -637,7 +638,11 @@ class ParticleFilter(InferenceModule):
         This function should return a normalized distribution.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        beliefs = DiscreteDistribution()
+        for particle in self.particles:
+            beliefs[particle] += 1.0
+        beliefs.normalize()
+        return beliefs
         "*** END YOUR CODE HERE ***"
     
     ########### ########### ###########
@@ -657,7 +662,13 @@ class ParticleFilter(InferenceModule):
         the DiscreteDistribution may be useful.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        weights = DiscreteDistribution()
+        for particle in self.particles:
+            weights[particle] += self.getObservationProb(observation, gameState.getPacmanPosition(), particle, self.getJailPosition())
+        if weights.total() > 0:
+            self.particles = [weights.sample() for _ in range(0, self.numParticles)]
+        else:
+            self.initializeUniformly(gameState)
         "*** END YOUR CODE HERE ***"
     
     ########### ########### ###########
@@ -670,5 +681,5 @@ class ParticleFilter(InferenceModule):
         gameState.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        self.particles = [self.getPositionDistribution(gameState, p).sample() for p in self.particles]
         "*** END YOUR CODE HERE ***"
